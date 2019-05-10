@@ -23,6 +23,7 @@ class AppKernel extends Kernel
             // Plugin bundles
             new FOS\UserBundle\FOSUserBundle(),
             new FOS\RestBundle\FOSRestBundle(),
+            new JMS\SerializerBundle\JMSSerializerBundle(),
 
             // Build-in bundles
             new AppBundle\AppBundle(),
