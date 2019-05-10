@@ -1,11 +1,21 @@
 # To get started with security, check out the documentation:
 # https://symfony.com/doc/current/security.html
 security:
+    encoders:
+        FOS\UserBundle\Model\UserInterface: bcrypt
+
+#    role_hierarchy:
+#        ROLE_USER:        ROLE_USER
+#        ROLE_ADMIN:       ROLE_ADMIN
 
     # https://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
     providers:
         in_memory:
             memory: ~
+
+        fos_userbundle:
+            id: fos_user.user_provider.username
+
 
     firewalls:
         # disables authentication for assets and the profiler, adapt it according to your needs
@@ -14,7 +24,43 @@ security:
             security: false
 
         main:
-            anonymous: ~
+            pattern: ^/
+            logout:       true
+            anonymous:    true
+            form_login:
+                provider: fos_userbundle
+                csrf_token_generator: security.csrf.token_manager
+
+        api:
+            pattern:   ^/api
+            stateless: true
+            anonymous: true # del this line when use guard!
+#            guard:
+#                authenticators:
+#                    - lexik_jwt_authentication.jwt_token_authenticator
+
+        api_login:
+            pattern:  ^/api/user/login
+            stateless: true
+            anonymous: true
+#            form_login:
+#                check_path:               /api/user/login_check
+#                success_handler:          lexik_jwt_authentication.handler.authentication_success
+#                failure_handler:          lexik_jwt_authentication.handler.authentication_failure
+#                require_previous_session: false
+
+        api_register:
+            pattern: ^/api/user/register
+            anonymous: true
+
+        api_email_validation:
+            pattern: ^/api/user/email-validation
+            anonymous: true
+
+        api_username_validation:
+            pattern: ^/api/user/username-validation
+            anonymous: true
+
             # activate different ways to authenticate
 
             # https://symfony.com/doc/current/security.html#a-configuring-how-your-users-will-authenticate
@@ -22,3 +68,16 @@ security:
 
             # https://symfony.com/doc/current/security/form_login_setup.html
             #form_login: ~
+
+    access_control:
+        # REST API part
+        - { path: ^/api/user/username-validation$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/user/email-validation$,    roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/user/register$,            roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/user/login$,               roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api,                           roles: IS_AUTHENTICATED_FULLY }
+        # Main application part
+#        - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+#        - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
+#        - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
+#        - { path: ^/admin/, role: ROLE_ADMIN }
